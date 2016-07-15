@@ -322,7 +322,7 @@ def recurrence_plot_extraction(feature, d='cosine', method='rec', **kwargs):
 def ssm_extraction(feature, d='cosine', method='default'):
     f = copy.copy(feature)
     if method == 'default':
-        return _self_sim_naive(feature)
+        return _self_sim_naive(feature, d)
     elif method == 'sc':
         return _self_sim_sc(f, d)
     else:
@@ -363,13 +363,13 @@ def _self_sim_sc(feature, d):
     k = 1 + np.ceil(2 * np.log2(feature.shape[0]))
     feature += np.finfo('float').eps
     D = scipy.spatial.distance.cdist(feature, feature, metric=d)
-    sigma = estimate_bandwidth(D, k)
+    sigma = estimate_bandwidth(D, int(k))
     A = np.exp(-0.5 * (D / sigma))
     return A
 
 
-def _self_sim_naive(feature):
-    return 1.0 - scipy.spatial.distance.cdist(feature, feature, metric='cosine')
+def _self_sim_naive(feature, d):
+    return 1.0 - scipy.spatial.distance.cdist(feature, feature, metric=d)
 
 
 def estimate_bandwidth(D, k):
