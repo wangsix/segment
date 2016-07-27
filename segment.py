@@ -368,10 +368,8 @@ def _self_sim_sc(feature, d):
     A = np.exp(-0.5 * (D / sigma))
     return A
 
-
 def _self_sim_naive(feature, d):
     return 1.0 - scipy.spatial.distance.cdist(feature, feature, metric=d)
-
 
 def estimate_bandwidth(D, k):
     '''Estimate the bandwidth of a gaussian kernel.
