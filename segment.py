@@ -93,7 +93,7 @@ def segment_labeling(x, boundaries, c_method='kmeans', k=5):
     return seg_labels
 
 
-def structure_feature_segmenter(feature=None, sf=None, width=GAUSS_WIDTH, method='rec', delta=0.05, m='rsfx'):
+def structure_feature_segmenter(feature=None, sf=None, boundaries=None, width=GAUSS_WIDTH, method='rec', delta=0.05, m='rsfx'):
 
     if sf is None:
         ssm = recurrence_plot_extraction(feature, method=method, m=m)
@@ -108,20 +108,21 @@ def structure_feature_segmenter(feature=None, sf=None, width=GAUSS_WIDTH, method
     ssm = diag_median_filter(ssm, width=9)
     ssm = np.maximum(ssm, ssm.T)
 
-    novelty_curve = np.sqrt(np.mean(np.diff(sf, axis=1) ** 2, axis=0))
-    novelty_curve = pre.minmax_scale(novelty_curve)
-    novelty_curve = np.insert(novelty_curve, 0, 0)
+    if boundaries is None:
+        novelty_curve = np.sqrt(np.mean(np.diff(sf, axis=1) ** 2, axis=0))
+        novelty_curve = pre.minmax_scale(novelty_curve)
+        novelty_curve = np.insert(novelty_curve, 0, 0)
 
-    bound_width = 9
-    offset = int((bound_width - 1) / 2)
-    tmp_novelty = np.pad(novelty_curve, [offset], mode='reflect')
-    boundaries = np.array([0])
-    for i in range(len(novelty_curve)):
-        if (np.greater(tmp_novelty[i + offset], tmp_novelty[i:i + offset]).all() and
-                np.greater(tmp_novelty[i + offset], tmp_novelty[i + offset + 1:i + bound_width]).all() and
-                tmp_novelty[i + offset] > delta):
-            boundaries = np.append(boundaries, i)
-    boundaries = np.unique(np.append(boundaries, sf.shape[1]-1))
+        bound_width = 9
+        offset = int((bound_width - 1) / 2)
+        tmp_novelty = np.pad(novelty_curve, [offset], mode='reflect')
+        boundaries = np.array([0])
+        for i in range(len(novelty_curve)):
+            if (np.greater(tmp_novelty[i + offset], tmp_novelty[i:i + offset]).all() and
+                    np.greater(tmp_novelty[i + offset], tmp_novelty[i + offset + 1:i + bound_width]).all() and
+                    tmp_novelty[i + offset] > delta):
+                boundaries = np.append(boundaries, i)
+        boundaries = np.unique(np.append(boundaries, sf.shape[1]-1))
 
     seg_sim_mat = np.zeros((len(boundaries) - 1, len(boundaries) - 1))
     intervals = zip(boundaries[:-1], boundaries[1:])
