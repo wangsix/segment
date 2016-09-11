@@ -72,7 +72,8 @@ def find_boundaries(frame_labels, width=9):
                              for (i, j) in zip(range(0, len(frame_labels) - width),
                                                range(width, len(frame_labels)))])
     boundaries = 1 + np.asarray(np.where(frame_labels[:-1] != frame_labels[1:])).reshape((-1,))
-    boundaries = np.unique(np.concatenate([[0], boundaries, [len(frame_labels)-1]]))
+    # boundaries = np.unique(np.concatenate([[0], boundaries, [len(frame_labels)-1]]))
+    boundaries = np.unique(np.concatenate([[0], boundaries]))
     return boundaries, frame_labels
 
 
